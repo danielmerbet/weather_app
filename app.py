@@ -52,53 +52,53 @@ def fetch_and_plot():
     # Plot Temperature
     plt.subplot(7, 1, 1)
     plt.plot(df.index, df["Temperature (°C)"], color="red")
-    plt.title("Hourly Temperature")
-    plt.ylabel("Temperature (°C)")
+    plt.title("Temperature")
+    plt.ylabel("°C")
     plt.grid()
     
     # Plot Precipitation
     plt.subplot(7, 1, 2)
     plt.plot(df.index, df["Precipitation (mm)"], color="red")
-    plt.title("Hourly Precipitation")
-    plt.ylabel("Precipitation (mm)")
+    plt.title("Precipitation")
+    plt.ylabel("mm")
     plt.grid()
 
     # Plot Relative Humidity
     plt.subplot(7, 1, 3)
     plt.plot(df.index, df["Relative Humidity (%)"], color="blue")
-    plt.title("Hourly Relative Humidity")
-    plt.ylabel("Humidity (%)")
+    plt.title("Relative Humidity")
+    plt.ylabel("%")
     plt.grid()
 
     # Plot Wind Speed
     plt.subplot(7, 1, 4)
     plt.plot(df.index, df["Wind Speed (km/h)"], color="green")
-    plt.title("Hourly Wind Speed")
-    plt.ylabel("Wind Speed (km/h)")
+    plt.title("Wind Speed")
+    plt.ylabel("km/h")
     plt.xlabel("Time")
     plt.grid()
     
     # Plot Solar Radiation
     plt.subplot(7, 1, 5)
     plt.plot(df.index, df["Solar Radiation (W/m²)"], color="green")
-    plt.title("Hourly Solar Radiation")
-    plt.ylabel("Solar Radiation (W/m²)")
+    plt.title("Solar Radiation")
+    plt.ylabel("W/m²")
     plt.xlabel("Time")
     plt.grid()
     
     # Plot Cloud Cover
     plt.subplot(7, 1, 6)
     plt.plot(df.index, df["Cloud Cover (%)"], color="green")
-    plt.title("Hourly Cloud Cover")
-    plt.ylabel("Cloud Cover (%)")
+    plt.title("Cloud Cover")
+    plt.ylabel("%")
     plt.xlabel("Time")
     plt.grid()
     
     # Plot Surface Pressure (hPa)
     plt.subplot(7, 1, 7)
     plt.plot(df.index, df["Surface Pressure (hPa)"], color="green")
-    plt.title("Hourly Surface Pressure")
-    plt.ylabel("Surface Pressure (hPa)")
+    plt.title("Surface Pressure")
+    plt.ylabel("hPa")
     plt.xlabel("Time")
     plt.grid()
 
