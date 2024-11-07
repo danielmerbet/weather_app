@@ -138,7 +138,7 @@ plot_data(df)
 
 # Schedule the fetch_and_plot function to run every hour
 scheduler = BackgroundScheduler()
-scheduler.add_job(plot_data, "interval", hours=1)
+scheduler.add_job(plot_data(fetch()), "interval", hours=1)
 scheduler.start()
 
 # Route to display the plot
