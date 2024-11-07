@@ -146,15 +146,15 @@ scheduler.start()
 def index():
   # Call the function initially to generate the plot
   plot_data()
-return render_template("index.html")
+  return render_template("index.html")
 
 @app.teardown_appcontext
 def shutdown_scheduler(exception=None):
   try:
-  if scheduler.running:
-  scheduler.shutdown()
-except SchedulerNotRunningError:
-  pass
+      if scheduler.running:
+          scheduler.shutdown()
+  except SchedulerNotRunningError:
+      pass
 
 if __name__ == '__main__':
   app.run(debug=True)
