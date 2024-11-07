@@ -10,14 +10,13 @@ import os
 
 app = Flask(__name__)
 
-# Function to fetch and plot weather data
-def fetch_and_plot():
-    # Step 1: Fetch data from the API
+def fetch():
+      # Step 1: Fetch data from the API
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": 41.97,
         "longitude": 2.38,
-        "hourly": "temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m,cloud_cover,surface_pressure,shortwave_radiation",
+        "hourly": "temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m,cloud_cover,surface_pressure,shortwave_radiation,et0_fao_evapotranspiration,evapotranspiration",
         "timezone": "auto"
     }
     response = requests.get(url, params=params)
@@ -32,6 +31,8 @@ def fetch_and_plot():
     cloud_cover = data["hourly"]["cloud_cover"]
     surface_pressure = data["hourly"]["surface_pressure"]
     shortwave_radiation = data["hourly"]["shortwave_radiation"]
+    potential_evaporation = data["hourly"]["et0_fao_evapotranspiration"]
+    evaporation = data["hourly"]["evapotranspiration"]
     
     # Convert to pandas DataFrame
     df = pd.DataFrame({
@@ -42,36 +43,43 @@ def fetch_and_plot():
         "Wind Speed (km/h)": wind_speed,
         "Solar Radiation (W/m²)": shortwave_radiation,
         "Cloud Cover (%)": cloud_cover,
-        "Surface Pressure (hPa)": surface_pressure
+        "Surface Pressure (hPa)": surface_pressure,
+        "Potential Evaporation (mm)": potential_evaporation,
+        "Evaporation (mm)": evaporation
     })
     df.set_index("Time", inplace=True)
+    
+    return df
+
+# Function to fetch and plot weather data
+def plot_data(df):
 
     # Step 3: Plot each variable
     plt.figure(figsize=(15, 10))
 
     # Plot Temperature
-    plt.subplot(7, 1, 1)
+    plt.subplot(8, 1, 1)
     plt.plot(df.index, df["Temperature (°C)"], color="red")
     plt.title("Temperature")
     plt.ylabel("°C")
     plt.grid()
     
     # Plot Precipitation
-    plt.subplot(7, 1, 2)
-    plt.plot(df.index, df["Precipitation (mm)"], color="red")
+    plt.subplot(8, 1, 2)
+    plt.bar(df.index, df["Precipitation (mm)"], width=0.05, color="blue")
     plt.title("Precipitation")
     plt.ylabel("mm")
     plt.grid()
 
     # Plot Relative Humidity
-    plt.subplot(7, 1, 3)
+    plt.subplot(8, 1, 3)
     plt.plot(df.index, df["Relative Humidity (%)"], color="blue")
     plt.title("Relative Humidity")
     plt.ylabel("%")
     plt.grid()
 
     # Plot Wind Speed
-    plt.subplot(7, 1, 4)
+    plt.subplot(8, 1, 4)
     plt.plot(df.index, df["Wind Speed (km/h)"], color="green")
     plt.title("Wind Speed")
     plt.ylabel("km/h")
@@ -79,28 +87,44 @@ def fetch_and_plot():
     plt.grid()
     
     # Plot Solar Radiation
-    plt.subplot(7, 1, 5)
-    plt.plot(df.index, df["Solar Radiation (W/m²)"], color="green")
+    plt.subplot(8, 1, 5)
+    plt.plot(df.index, df["Solar Radiation (W/m²)"], color="yellow")
     plt.title("Solar Radiation")
     plt.ylabel("W/m²")
     plt.xlabel("Time")
     plt.grid()
     
     # Plot Cloud Cover
-    plt.subplot(7, 1, 6)
-    plt.plot(df.index, df["Cloud Cover (%)"], color="green")
+    plt.subplot(8, 1, 6)
+    plt.plot(df.index, df["Cloud Cover (%)"], color="grey")
     plt.title("Cloud Cover")
     plt.ylabel("%")
     plt.xlabel("Time")
     plt.grid()
     
     # Plot Surface Pressure (hPa)
-    plt.subplot(7, 1, 7)
-    plt.plot(df.index, df["Surface Pressure (hPa)"], color="green")
+    plt.subplot(8, 1, 7)
+    plt.plot(df.index, df["Surface Pressure (hPa)"], color="violet")
     plt.title("Surface Pressure")
     plt.ylabel("hPa")
     plt.xlabel("Time")
     plt.grid()
+    
+    # Plot Evaporations (mm)
+    plt.subplot(8, 1, 8)
+    plt.plot(df.index, df["Potential Evaporation (mm)"], color="magenta")
+    plt.plot(df.index, df["Evaporation (mm)"], color="pink")
+    plt.title("Potential Evaporation and Evaporation")
+    plt.ylabel("mm")
+    plt.xlabel("Time")
+    plt.grid()
+    
+    #plt.subplot(9, 1, 9)
+    #plt.plot(df.index, df["Evaporation (mm)"], color="pink")
+    #plt.title("Evaporation")
+    #plt.ylabel("mm")
+    #plt.xlabel("Time")
+    #plt.grid()
 
     # Save plot to static folder
     plt.tight_layout()
@@ -109,7 +133,8 @@ def fetch_and_plot():
     plt.close()
 
 #Run for the first time
-fetch_and_plot()
+df = fetch()
+plot_data(df)
 
 # Schedule the fetch_and_plot function to run every hour
 scheduler = BackgroundScheduler()
@@ -119,17 +144,17 @@ scheduler.start()
 # Route to display the plot
 @app.route("/")
 def index():
-    # Call the function initially to generate the plot
-    fetch_and_plot()
-    return render_template("index.html")
+  # Call the function initially to generate the plot
+  plot_data()
+return render_template("index.html")
 
 @app.teardown_appcontext
 def shutdown_scheduler(exception=None):
-    try:
-        if scheduler.running:
-            scheduler.shutdown()
-    except SchedulerNotRunningError:
-        pass
+  try:
+  if scheduler.running:
+  scheduler.shutdown()
+except SchedulerNotRunningError:
+  pass
 
 if __name__ == '__main__':
-    app.run(debug=True)
+  app.run(debug=True)
