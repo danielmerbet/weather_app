@@ -3,6 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for Matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates  # Import for date formatting
 import requests
 from datetime import datetime
 import pandas as pd
@@ -49,112 +50,111 @@ def fetch():
     })
     df.set_index("Time", inplace=True)
     
+    # Filter the DataFrame to show only data from the current hour onwards
+    current_time = datetime.now()
+    df = df[df.index >= current_time]
+    
     return df
 
 # Function to fetch and plot weather data
 def plot_data(df):
+    # Create a figure for multiple plots
+    fig, axs = plt.subplots(4, 1, figsize=(15, 12))
+    fig.tight_layout(pad=4.0)  # Adjust spacing between plots
+    
+    # Reduce the spacing between subplots
+    fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
+    
+    # Plot 1: Temperature and Precipitation
+    axs[0].plot(df.index, df["Temperature (°C)"], color="red", lw=2, label="Temperature (°C)")
+    axs2 = axs[0].twinx()
+    axs2.bar(df.index, df["Precipitation (mm)"], width=0.05, color="blue", alpha=0.6, label="Precipitation (mm)")
+    #axs[0].set_title("Temperature and Precipitation", fontsize=16)
+    #axs[0].set_xlabel("Time", fontsize=14)
+    axs[0].set_ylabel("Temperature (°C)", fontsize=14, color="red")
+    axs2.set_ylabel("Precipitation (mm)", fontsize=14, color="blue")
+    axs[0].tick_params(axis='y', labelcolor="red")
+    axs2.tick_params(axis='y', labelcolor="blue")
+    axs[0].grid(True)
+    #axs[0].tick_params(axis='x', rotation=45)
+    axs[0].tick_params(axis='x', labelbottom=False) #this remove the x-labels
 
-    # Step 3: Plot each variable
-    plt.figure(figsize=(15, 10))
+    # Plot 2: Relative Humidity and Wind Speed
+    axs[1].plot(df.index, df["Relative Humidity (%)"], color="purple", lw=2, label="Relative Humidity (%)")
+    axs2 = axs[1].twinx()
+    axs2.plot(df.index, df["Wind Speed (km/h)"], color="green", lw=2, label="Wind Speed (km/h)", linestyle="--")
+    #axs[1].set_title("Relative Humidity and Wind Speed", fontsize=16)
+    #axs[1].set_xlabel("Time", fontsize=14)
+    axs[1].set_ylabel("Relative Humidity (%)", fontsize=14, color="purple")
+    axs2.set_ylabel("Wind Speed (km/h)", fontsize=14, color="green")
+    axs[1].tick_params(axis='y', labelcolor="purple")
+    axs2.tick_params(axis='y', labelcolor="green")
+    axs[1].grid(True)
+    #axs[1].tick_params(axis='x', rotation=45)
+    axs[1].tick_params(axis='x', labelbottom=False)
 
-    # Plot Temperature
-    plt.subplot(8, 1, 1)
-    plt.plot(df.index, df["Temperature (°C)"], color="red")
-    plt.title("Temperature")
-    plt.ylabel("°C")
-    plt.grid()
-    
-    # Plot Precipitation
-    plt.subplot(8, 1, 2)
-    plt.bar(df.index, df["Precipitation (mm)"], width=0.05, color="blue")
-    plt.title("Precipitation")
-    plt.ylabel("mm")
-    plt.grid()
+    # Plot 3: Solar Radiation and Cloud Cover
+    axs[2].plot(df.index, df["Solar Radiation (W/m²)"], color="orange", lw=2, label="Solar Radiation (W/m²)")
+    axs2 = axs[2].twinx()
+    axs2.plot(df.index, df["Cloud Cover (%)"], color="gray", lw=2, label="Cloud Cover (%)", linestyle="--")
+    #axs[2].set_title("Solar Radiation and Cloud Cover", fontsize=16)
+    #axs[2].set_xlabel("Time", fontsize=14)
+    axs[2].set_ylabel("Solar Radiation (W/m²)", fontsize=14, color="orange")
+    axs2.set_ylabel("Cloud Cover (%)", fontsize=14, color="grey")
+    axs[2].tick_params(axis='y', labelcolor="orange")
+    axs2.tick_params(axis='y', labelcolor="grey")
+    axs[2].grid(True)
+    #axs[2].tick_params(axis='x', rotation=45)
+    axs[2].tick_params(axis='x', labelbottom=False)
 
-    # Plot Relative Humidity
-    plt.subplot(8, 1, 3)
-    plt.plot(df.index, df["Relative Humidity (%)"], color="blue")
-    plt.title("Relative Humidity")
-    plt.ylabel("%")
-    plt.grid()
+    # Plot 4: Surface Pressure and Evaporations
+    axs[3].plot(df.index, df["Surface Pressure (hPa)"], color="brown", lw=2, label="Surface Pressure (hPa)")
+    axs2 = axs[3].twinx()
+    axs2.plot(df.index, df["Potential Evaporation (mm)"], color="magenta", lw=2, label="Potential Evaporation (mm)", linestyle="-.")
+    axs2.plot(df.index, df["Evaporation (mm)"], color="pink", lw=2, label="Evaporation (mm)", linestyle="--")
+    #axs[3].set_title("Surface Pressure and Evaporations", fontsize=16)
+    #axs[3].set_xlabel("Time", fontsize=14)
+    axs[3].set_ylabel("Surface Pressure (hPa)", fontsize=14, color="brown")
+    axs2.set_ylabel("Evaporat./Pot.Evaporat. (mm)", fontsize=14, color="magenta")
+    axs[3].tick_params(axis='y', labelcolor="brown")
+    axs2.tick_params(axis='y', labelcolor="magenta")
+    axs[3].grid(True)
+    axs[3].tick_params(axis='x', rotation=45)
 
-    # Plot Wind Speed
-    plt.subplot(8, 1, 4)
-    plt.plot(df.index, df["Wind Speed (km/h)"], color="green")
-    plt.title("Wind Speed")
-    plt.ylabel("km/h")
-    plt.xlabel("Time")
-    plt.grid()
-    
-    # Plot Solar Radiation
-    plt.subplot(8, 1, 5)
-    plt.plot(df.index, df["Solar Radiation (W/m²)"], color="yellow")
-    plt.title("Solar Radiation")
-    plt.ylabel("W/m²")
-    plt.xlabel("Time")
-    plt.grid()
-    
-    # Plot Cloud Cover
-    plt.subplot(8, 1, 6)
-    plt.plot(df.index, df["Cloud Cover (%)"], color="grey")
-    plt.title("Cloud Cover")
-    plt.ylabel("%")
-    plt.xlabel("Time")
-    plt.grid()
-    
-    # Plot Surface Pressure (hPa)
-    plt.subplot(8, 1, 7)
-    plt.plot(df.index, df["Surface Pressure (hPa)"], color="violet")
-    plt.title("Surface Pressure")
-    plt.ylabel("hPa")
-    plt.xlabel("Time")
-    plt.grid()
-    
-    # Plot Evaporations (mm)
-    plt.subplot(8, 1, 8)
-    plt.plot(df.index, df["Potential Evaporation (mm)"], color="magenta")
-    plt.plot(df.index, df["Evaporation (mm)"], color="pink")
-    plt.title("Potential Evaporation and Evaporation")
-    plt.ylabel("mm")
-    plt.xlabel("Time")
-    plt.grid()
-    
-    #plt.subplot(9, 1, 9)
-    #plt.plot(df.index, df["Evaporation (mm)"], color="pink")
-    #plt.title("Evaporation")
-    #plt.ylabel("mm")
-    #plt.xlabel("Time")
-    #plt.grid()
+    # Format x-axis for all subplots to display month-day hour
+    for ax in axs:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))  # Format as Month-Day Hour
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))  # Set major ticks every hour
 
-    # Save plot to static folder
-    plt.tight_layout()
+    # Save the plot to static folder
     plot_path = os.path.join("static", "plot.png")
-    plt.savefig(plot_path)
+    plt.savefig(plot_path, dpi=300)  # Save with higher DPI for better quality
     plt.close()
+
 
 #Run for the first time
 df = fetch()
 plot_data(df)
 
 # Schedule the fetch_and_plot function to run every hour
-scheduler = BackgroundScheduler()
-scheduler.add_job(lambda: plot_data(fetch()), "interval", hours=1)
-scheduler.start()
+#scheduler = BackgroundScheduler()
+#scheduler.add_job(lambda: plot_data(fetch()), "interval", hours=1)
+#scheduler.start()
 
 # Route to display the plot
-@app.route("/")
-def index():
+#@app.route("/")
+#def index():
   # Call the function initially to generate the plot
-  plot_data(fetch())
-  return render_template("index.html")
+#  plot_data(fetch())
+#  return render_template("index.html")
 
-@app.teardown_appcontext
-def shutdown_scheduler(exception=None):
-  try:
-      if scheduler.running:
-          scheduler.shutdown()
-  except SchedulerNotRunningError:
-      pass
+#@app.teardown_appcontext
+#def shutdown_scheduler(exception=None):
+#  try:
+#      if scheduler.running:
+#          scheduler.shutdown()
+#  except SchedulerNotRunningError:
+#      pass
 
-if __name__ == '__main__':
-  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+#if __name__ == '__main__':
+#  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
