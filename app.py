@@ -137,24 +137,24 @@ df = fetch()
 plot_data(df)
 
 # Schedule the fetch_and_plot function to run every hour
-#scheduler = BackgroundScheduler()
-#scheduler.add_job(lambda: plot_data(fetch()), "interval", hours=1)
-#scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(lambda: plot_data(fetch()), "interval", hours=1)
+scheduler.start()
 
 # Route to display the plot
-#@app.route("/")
-#def index():
+@app.route("/")
+def index():
   # Call the function initially to generate the plot
-#  plot_data(fetch())
-#  return render_template("index.html")
+  plot_data(fetch())
+  return render_template("index.html")
 
-#@app.teardown_appcontext
-#def shutdown_scheduler(exception=None):
-#  try:
-#      if scheduler.running:
-#          scheduler.shutdown()
-#  except SchedulerNotRunningError:
-#      pass
+@app.teardown_appcontext
+def shutdown_scheduler(exception=None):
+  try:
+      if scheduler.running:
+          scheduler.shutdown()
+  except SchedulerNotRunningError:
+      pass
 
-#if __name__ == '__main__':
-#  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+if __name__ == '__main__':
+  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
