@@ -145,7 +145,7 @@ scheduler.start()
 @app.route("/")
 def index():
   # Call the function initially to generate the plot
-  plot_data()
+  plot_data(fetch())
   return render_template("index.html")
 
 @app.teardown_appcontext
