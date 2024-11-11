@@ -10,8 +10,9 @@ import pandas as pd
 import os
 
 app = Flask(__name__)
+scheduler = BackgroundScheduler()
 
-def fetch():
+def fetch_data():
       # Step 1: Fetch data from the API
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -132,30 +133,34 @@ def plot_data(df):
     plt.close()
 
 
-#Run for the first time
-df = fetch()
-plot_data(df)
+# Fetch and plot data, called every hour by the scheduler
+def fetch_and_plot():
+    df = fetch_data()
+    plot_data(df)
+
+# Run the initial fetch and plot
+fetch_and_plot()
 
 # Schedule the fetch_and_plot function to run every hour
-scheduler = BackgroundScheduler()
-scheduler.add_job(lambda: plot_data(fetch()), "interval", hours=1)
+scheduler.add_job(fetch_and_plot, "interval", hours=1)
 scheduler.start()
 
-# Route to display the plot
+# Flask route to display the plot
 @app.route("/")
 def index():
-  # Call the function initially to generate the plot
-  plot_data(fetch())
-  return render_template("index.html")
+    # Update plot before rendering
+    fetch_and_plot()
+    return render_template("index.html")
 
+# Shutdown scheduler gracefully when app context is terminated
 @app.teardown_appcontext
 def shutdown_scheduler(exception=None):
-  try:
-      if scheduler.running:
-          scheduler.shutdown()
-  except SchedulerNotRunningError:
-      pass
+    try:
+        if scheduler.running:
+            scheduler.shutdown()
+    except SchedulerNotRunningError:
+        pass
 
 if __name__ == '__main__':
-  app.run(debug=True)
-  #app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(debug=True)
+    #  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
