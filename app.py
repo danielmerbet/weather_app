@@ -61,7 +61,7 @@ def fetch_data():
 cm = 1 / 2.54
 def plot_data(df):
     # Create a figure for multiple plots
-    fig, axs = plt.subplots(4, 1, figsize=(15*cm, 13*cm))
+    fig, axs = plt.subplots(4, 1, figsize=(12*cm, 10*cm))
     fig.tight_layout(pad=2.0)  # Reduce padding to make use of more space
     fig.subplots_adjust(hspace=0.1)  # Adjust margins
     
