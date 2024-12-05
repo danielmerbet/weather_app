@@ -16,8 +16,11 @@ scheduler = BackgroundScheduler()
 
 lat = 41.97
 lon = 2.38
-model = "icon_seamless"
-members = 40
+model = "gfs_seamless" #"icon_seamless" # "gfs_seamless"
+if model == "gfs_seamless":
+  members = 31
+if model == "icon_seamless":
+  members = 40
 def fetch_data():
     # Step 1: Fetch data from the API
     url = "https://ensemble-api.open-meteo.com/v1/ensemble"
