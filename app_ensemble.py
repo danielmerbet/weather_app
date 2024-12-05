@@ -28,7 +28,7 @@ def fetch_data():
         "latitude": lat,
         "longitude": lon,
         "hourly": "temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m,cloud_cover,surface_pressure,shortwave_radiation,et0_fao_evapotranspiration",
-        "timezone": "auto",
+        "timezone": "Europe/Berlin", #auto
         "models": model
     }
     response = requests.get(url, params=params)
@@ -151,7 +151,7 @@ def plot_data(df):
     #axs[3].xaxis.set_minor_locator(mdates.HourLocator(interval=6))  # Minor ticks every hour
 
     # Add the main x-axis label
-    axs[3].set_xlabel("Time", fontsize=label_sizes, labelpad=1)
+    axs[3].set_xlabel("Time (UTC +1)", fontsize=label_sizes, labelpad=1)
     #change y-axis
     axs[3].tick_params(axis='y', labelsize=label_sizes)
 
